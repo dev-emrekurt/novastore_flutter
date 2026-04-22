@@ -104,6 +104,58 @@ class ApiService {
     await _storage.write('user_email', email);
   }
 
+  /// Register endpoint'ine POST isteği yapır ve yeni kullanıcı oluşturur
+  static Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    try {
+      developer.log('KAYIT İSTEĞİ BAŞLATILDI', name: 'AUTH', level: 800);
+
+      developer.log(
+        'Email: $email, Full Name: $fullName',
+        name: 'AUTH',
+        level: 800,
+      );
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'full_name': fullName,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonResponse = jsonDecode(response.body);
+
+        developer.log('KAYIT BAŞARILI', name: 'AUTH', level: 800);
+
+        developer.log(
+          'User ID: ${jsonResponse['userId'] ?? jsonResponse['id']}',
+          name: 'AUTH',
+          level: 800,
+        );
+
+        return jsonResponse;
+      } else {
+        final errorMessage =
+            'Kayıt başarısız: ${response.statusCode} - ${response.body}';
+
+        developer.log(errorMessage, name: 'AUTH', level: 900);
+
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      developer.log('Kayıt hatası: $e', name: 'AUTH', level: 1000);
+
+      throw Exception('Kayıt hatası: $e');
+    }
+  }
+
   /// Kaydedilen token'ı al
   static Future<String?> getToken() async {
     return _storage.read('auth_token');

@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:novastore_flutter/theme.dart';
+import 'package:novastore_flutter/services/api_service.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,18 +13,122 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordConfirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
+  }
+
+  /// Validasyon kontrol et
+  bool _validateForm() {
+    if (_fullNameController.text.isEmpty) {
+      _showError('Ad Soyad boş bırakılamaz');
+      return false;
+    }
+
+    if (_emailController.text.isEmpty) {
+      _showError('E-mail adresi boş bırakılamaz');
+      return false;
+    }
+
+    if (!_emailController.text.contains('@')) {
+      _showError('Geçerli bir e-mail adresi giriniz');
+      return false;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showError('Şifre boş bırakılamaz');
+      return false;
+    }
+
+    if (_passwordController.text.length < 8) {
+      _showError('Şifre en az 8 karakter olmalıdır');
+      return false;
+    }
+
+    if (_passwordController.text != _passwordConfirmController.text) {
+      _showError('Şifreler eşleşmiyor');
+      return false;
+    }
+
+    return true;
+  }
+
+  /// Hata göster
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.montserrat()),
+        backgroundColor: colorScheme.error,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// Kayıt işlemini gerçekleştir
+  Future<void> _handleRegister() async {
+    if (!_validateForm()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      developer.log('Kayıt işlemi başlatıldı', name: 'REGISTER', level: 800);
+
+      await ApiService.register(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        fullName: _fullNameController.text.trim(),
+      );
+
+      developer.log(
+        'Kayıt başarılı, login_screen\'e yönlendiriliyour',
+        name: 'REGISTER',
+        level: 800,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Hesap başarıyla oluşturuldu! Lütfen giriş yapınız.',
+              style: GoogleFonts.montserrat(),
+            ),
+            backgroundColor: colorScheme.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Login ekranına yönlendir
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    } catch (e) {
+      developer.log('Kayıt hatası: $e', name: 'REGISTER', level: 1000);
+
+      if (mounted) {
+        _showError('Kayıt başarısız: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -81,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(
                     height: 50,
                     child: TextField(
-                      controller: _emailController,
+                      controller: _fullNameController,
                       decoration: InputDecoration(
                         hintText: 'Adınız ve soyadınız',
                         filled: true,
@@ -105,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                       ),
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.name,
                     ),
                   ),
                 ],
@@ -281,23 +385,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Kayıt oluşturma işlemi
-                    if (kDebugMode) {
-                      print('Email: ${_emailController.text}');
-                      print('Password: ${_passwordController.text}');
-                      print(
-                        'Password Confirm: ${_passwordConfirmController.text}',
-                      );
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
@@ -308,9 +396,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 8,
                     children: [
-                      Icon(Icons.edit, color: colorScheme.onPrimary),
+                      if (_isLoading)
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: colorScheme.onPrimary,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      else
+                        Icon(Icons.edit, color: colorScheme.onPrimary),
                       Text(
-                        'Hesap Oluştur',
+                        _isLoading ? 'Kaydediliyor...' : 'Hesap Oluştur',
                         style: GoogleFonts.montserrat(
                           color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
