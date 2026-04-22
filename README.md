@@ -313,9 +313,6 @@ Map<String, dynamic> _ordersData
 
 ## 👨‍💻 Geliştirici Bilgileri
 
-- Geliştiriciler: Emre Kurt
-- Son Güncelleme: 20 Nisan 2026
-- Versiyon: 1.0.0
-
+- Emre Kurt tarafından geliştirilmiştir.
 
 **Not**: Bu proje eğitim amaçlı geliştirilmiştir. Production ortamında ek güvenlik önlemleri alınması önerilir.
