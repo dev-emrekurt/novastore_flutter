@@ -132,6 +132,14 @@ https://site--novastore--8vnyqvdcq6fp.code.run/api
     "password": "password"
   }
   ```
+- `POST /auth/register` - Yeni kullanıcı kaydı
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password123",
+    "full_name": "Ad Soyad"
+  }
+  ```
 
 #### Ürünler
 - `GET /products` - Tüm ürünleri al
@@ -234,6 +242,12 @@ GetStorage ile aşağıdaki veriler saklanır:
 **Ürünler**
 - `getProducts()` - Tüm ürünleri al
 - `getCategories()` - Kategorileri al
+
+## 🔐 Kayıt Akışı
+1. **Veri Girişi**: Kullanıcıdan Ad Soyad, Email, Şifre ve Şifre Tekrar bilgileri alınır.
+2. **Validasyon**: Boş alan kontrolü, geçerli email formatı (`@` kontrolü), minimum 8 karakter şifre uzunluğu ve şifrelerin birbiriyle eşleşmesi kontrol edilir.
+3. **API İsteği**: Veriler `ApiService.register` metodu aracılığıyla asenkron olarak sunucuya gönderilir.
+4. **Yönlendirme**: Kayıt başarılı ise kullanıcıya bir SnackBar bildirimi gösterilir ve otomatik olarak Login ekranına yönlendirilir.
 
 ## 🎨 Tema
 
