@@ -1,0 +1,36 @@
+name: novastore_flutter
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  bootstrap_icons: ^1.13.1
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.0
+  http: ^1.1.0
+  get_storage: ^2.1.1
+  flutter_native_splash: ^2.4.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+
+
+flutter_native_splash:
+  color: "#7C9E95" # Senin renk paletindeki primary rengin (Örn: Mor)
+  image: assets/images/logo_splash.png # Logonun yolu
+  
+  android_12: # Android 12 ve üzeri için özel ayar (Zorunludur)
+    image: assets/images/logo_splash.png
+    color: "#7C9E95"
